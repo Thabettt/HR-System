@@ -26,7 +26,7 @@ export class claims {
     amount: number;
 
     @Prop({})
-    approvedAmountr?: number;
+    approvedAmount?: number;
 
     @Prop({ required: true, type: String, enum: ClaimStatus, default: ClaimStatus.UNDER_REVIEW })
     status: ClaimStatus;// under review, approved, rejected
