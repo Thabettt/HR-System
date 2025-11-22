@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { seedOrganizationStructure, seedPositionAssignments } from './organization-structure.seed';
+import { seedOrganizationStructure, seedPositionAssignments, seedStructureRequests } from './organization-structure.seed';
 import { seedEmployeeProfile } from './employee-profile.seed';
 import { seedPerformance } from './performance.seed';
 import { seedPayrollConfiguration } from './payroll-configuration.seed';
@@ -26,8 +26,11 @@ async function seed() {
     // 3. Seed Position Assignments
     await seedPositionAssignments(mongoose.connection, employees, positions, departments);
 
+    // 3.1 Seed Structure Requests (Requires Employees)
+    await seedStructureRequests(mongoose.connection, employees);
+
     // 4. Seed Performance Data
-    await seedPerformance(mongoose.connection, departments);
+    await seedPerformance(mongoose.connection, departments, employees);
 
     // 5. Seed Payroll Configuration
     const payrollConfig = await seedPayrollConfiguration(mongoose.connection, employees);

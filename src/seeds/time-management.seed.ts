@@ -6,7 +6,11 @@ import { latenessRuleSchema } from '../time-management/models/lateness-rule.sche
 import { OvertimeRuleSchema } from '../time-management/models/overtime-rule.schema';
 import { ScheduleRuleSchema } from '../time-management/models/schedule-rule.schema';
 import { ShiftAssignmentSchema } from '../time-management/models/shift-assignment.schema';
-import { PunchPolicy, HolidayType, ShiftAssignmentStatus } from '../time-management/models/enums/index';
+import { AttendanceRecordSchema } from '../time-management/models/attendance-record.schema';
+import { TimeExceptionSchema } from '../time-management/models/time-exception.schema';
+import { AttendanceCorrectionRequestSchema } from '../time-management/models/attendance-correction-request.schema';
+import { NotificationLogSchema } from '../time-management/models/notification-log.schema';
+import { PunchType, TimeExceptionType, CorrectionRequestStatus, PunchPolicy, HolidayType, ShiftAssignmentStatus } from '../time-management/models/enums/index';
 
 export async function seedTimeManagement(connection: mongoose.Connection, employees: any, departments: any, positions: any) {
   const ShiftTypeModel = connection.model('ShiftType', ShiftTypeSchema);
@@ -16,6 +20,10 @@ export async function seedTimeManagement(connection: mongoose.Connection, employ
   const OvertimeRuleModel = connection.model('OvertimeRule', OvertimeRuleSchema);
   const ScheduleRuleModel = connection.model('ScheduleRule', ScheduleRuleSchema);
   const ShiftAssignmentModel = connection.model('ShiftAssignment', ShiftAssignmentSchema);
+  const AttendanceRecordModel = connection.model('AttendanceRecord', AttendanceRecordSchema);
+  const TimeExceptionModel = connection.model('TimeException', TimeExceptionSchema);
+  const AttendanceCorrectionRequestModel = connection.model('AttendanceCorrectionRequest', AttendanceCorrectionRequestSchema);
+  const NotificationLogModel = connection.model('NotificationLog', NotificationLogSchema);
 
   console.log('Clearing Time Management...');
   await ShiftTypeModel.deleteMany({});
@@ -25,6 +33,10 @@ export async function seedTimeManagement(connection: mongoose.Connection, employ
   await OvertimeRuleModel.deleteMany({});
   await ScheduleRuleModel.deleteMany({});
   await ShiftAssignmentModel.deleteMany({});
+  await AttendanceRecordModel.deleteMany({});
+  await TimeExceptionModel.deleteMany({});
+  await AttendanceCorrectionRequestModel.deleteMany({});
+  await NotificationLogModel.deleteMany({});
 
   console.log('Seeding Shift Types...');
   const morningShiftType = await ShiftTypeModel.create({
@@ -109,8 +121,44 @@ export async function seedTimeManagement(connection: mongoose.Connection, employ
   }
   console.log('Shift Assignments seeded.');
 
+  console.log('Seeding Attendance Records...');
+  const attendanceRecord = await AttendanceRecordModel.create({
+    employeeId: employees.alice._id,
+    punches: [
+      { type: PunchType.IN, time: new Date(new Date().setHours(9, 0, 0, 0)) },
+      { type: PunchType.OUT, time: new Date(new Date().setHours(17, 0, 0, 0)) },
+    ],
+  });
+  console.log('Attendance Records seeded.');
+
+  console.log('Seeding Time Exceptions...');
+  await TimeExceptionModel.create({
+    employeeId: employees.alice._id,
+    type: TimeExceptionType.LATE,
+    attendanceRecordId: attendanceRecord._id,
+    assignedTo: employees.alice._id, // Self-assigned for demo
+  });
+  console.log('Time Exceptions seeded.');
+
+  console.log('Seeding Attendance Correction Requests...');
+  await AttendanceCorrectionRequestModel.create({
+    employeeId: employees.alice._id,
+    attendanceRecord: attendanceRecord,
+    reason: 'Forgot to punch in',
+    status: CorrectionRequestStatus.SUBMITTED,
+  });
+  console.log('Attendance Correction Requests seeded.');
+
+  console.log('Seeding Notification Logs...');
+  await NotificationLogModel.create({
+    to: employees.alice._id,
+    type: 'SHIFT_REMINDER',
+    message: 'You have a shift tomorrow at 9 AM.',
+  });
+  console.log('Notification Logs seeded.');
+
   return {
-    shiftTypes: { morningShiftType, nightShiftType },
+    shiftTypes: { morningShiftType },
     shifts: { standardMorningShift, standardNightShift },
   };
 }

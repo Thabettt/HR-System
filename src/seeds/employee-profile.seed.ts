@@ -1,12 +1,21 @@
 import mongoose from 'mongoose';
 import { EmployeeProfileSchema } from '../employee-profile/models/employee-profile.schema';
-import { EmployeeStatus, ContractType, WorkType, Gender, MaritalStatus } from '../employee-profile/enums/employee-profile.enums';
+import { EmployeeQualificationSchema } from '../employee-profile/models/qualification.schema';
+import { EmployeeSystemRoleSchema } from '../employee-profile/models/employee-system-role.schema';
+import { EmployeeProfileChangeRequestSchema } from '../employee-profile/models/ep-change-request.schema';
+import { EmployeeStatus, ContractType, WorkType, Gender, MaritalStatus, GraduationType, SystemRole, ProfileChangeStatus } from '../employee-profile/enums/employee-profile.enums';
 
 export async function seedEmployeeProfile(connection: mongoose.Connection, departments: any, positions: any) {
   const EmployeeProfileModel = connection.model('EmployeeProfile', EmployeeProfileSchema);
+  const EmployeeQualificationModel = connection.model('EmployeeQualification', EmployeeQualificationSchema);
+  const EmployeeSystemRoleModel = connection.model('EmployeeSystemRole', EmployeeSystemRoleSchema);
+  const EmployeeProfileChangeRequestModel = connection.model('EmployeeProfileChangeRequest', EmployeeProfileChangeRequestSchema);
 
   console.log('Clearing Employee Profiles...');
   await EmployeeProfileModel.deleteMany({});
+  await EmployeeQualificationModel.deleteMany({});
+  await EmployeeSystemRoleModel.deleteMany({});
+  await EmployeeProfileChangeRequestModel.deleteMany({});
 
   console.log('Seeding Employees...');
   const alice = await EmployeeProfileModel.create({
@@ -60,6 +69,30 @@ export async function seedEmployeeProfile(connection: mongoose.Connection, depar
     primaryDepartmentId: departments.salesDept._id,
   });
   console.log('Employees seeded.');
+
+  console.log('Seeding Employee Qualifications...');
+  await EmployeeQualificationModel.create({
+    employeeProfileId: alice._id,
+    establishmentName: 'University of Tech',
+    graduationType: GraduationType.BACHELOR,
+  });
+  console.log('Employee Qualifications seeded.');
+
+  console.log('Seeding Employee System Roles...');
+  await EmployeeSystemRoleModel.create({
+    employeeProfileId: alice._id,
+    roles: [SystemRole.HR_MANAGER, SystemRole.SYSTEM_ADMIN],
+  });
+  console.log('Employee System Roles seeded.');
+
+  console.log('Seeding Employee Profile Change Requests...');
+  await EmployeeProfileChangeRequestModel.create({
+    requestId: 'REQ-PROF-001',
+    employeeProfileId: alice._id,
+    requestDescription: 'Update phone number',
+    status: ProfileChangeStatus.PENDING,
+  });
+  console.log('Employee Profile Change Requests seeded.');
 
   return { alice, bob, charlie };
 }

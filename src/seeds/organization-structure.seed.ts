@@ -3,13 +3,24 @@ import { DepartmentSchema } from '../organization-structure/models/department.sc
 import { PositionSchema } from '../organization-structure/models/position.schema';
 import { PositionAssignmentSchema } from '../organization-structure/models/position-assignment.schema';
 
+import { StructureChangeRequestSchema } from '../organization-structure/models/structure-change-request.schema';
+import { StructureChangeLogSchema } from '../organization-structure/models/structure-change-log.schema';
+import { StructureApprovalSchema } from '../organization-structure/models/structure-approval.schema';
+import { StructureRequestType, StructureRequestStatus, ChangeLogAction, ApprovalDecision } from '../organization-structure/enums/organization-structure.enums';
+
 export async function seedOrganizationStructure(connection: mongoose.Connection) {
   const DepartmentModel = connection.model('Department', DepartmentSchema);
   const PositionModel = connection.model('Position', PositionSchema);
+  const StructureChangeRequestModel = connection.model('StructureChangeRequest', StructureChangeRequestSchema);
+  const StructureChangeLogModel = connection.model('StructureChangeLog', StructureChangeLogSchema);
+  const StructureApprovalModel = connection.model('StructureApproval', StructureApprovalSchema);
 
   console.log('Clearing Organization Structure data...');
   await DepartmentModel.deleteMany({});
   await PositionModel.deleteMany({});
+  await StructureChangeRequestModel.deleteMany({});
+  await StructureChangeLogModel.deleteMany({});
+  await StructureApprovalModel.deleteMany({});
   
   // 1. Create Departments
   console.log('Seeding Departments...');
@@ -66,6 +77,48 @@ export async function seedOrganizationStructure(connection: mongoose.Connection)
     departments: { hrDept, engDept, salesDept },
     positions: { hrManagerPos, softwareEngPos, salesRepPos },
   };
+}
+
+export async function seedStructureRequests(connection: mongoose.Connection, employees: any) {
+  const StructureChangeRequestModel = connection.model('StructureChangeRequest', StructureChangeRequestSchema);
+  const StructureChangeLogModel = connection.model('StructureChangeLog', StructureChangeLogSchema);
+  const StructureApprovalModel = connection.model('StructureApproval', StructureApprovalSchema);
+
+  if (employees && employees.alice) {
+    console.log('Seeding Structure Change Requests...');
+    const changeRequest = await StructureChangeRequestModel.create({
+      _id: new mongoose.Types.ObjectId(),
+      requestNumber: 'REQ-ORG-001',
+      requestedByEmployeeId: employees.alice._id,
+      requestType: StructureRequestType.NEW_DEPARTMENT,
+      status: StructureRequestStatus.SUBMITTED,
+      details: JSON.stringify({
+        name: 'Marketing',
+        code: 'MKT-001',
+      }),
+    });
+    console.log('Structure Change Requests seeded.');
+
+    console.log('Seeding Structure Change Logs...');
+    await StructureChangeLogModel.create({
+      _id: new mongoose.Types.ObjectId(),
+      action: ChangeLogAction.CREATED,
+      entityType: 'StructureChangeRequest',
+      entityId: changeRequest._id,
+      changedBy: employees.alice._id,
+      changes: { status: 'SUBMITTED' },
+    });
+    console.log('Structure Change Logs seeded.');
+
+    console.log('Seeding Structure Approvals...');
+    await StructureApprovalModel.create({
+      _id: new mongoose.Types.ObjectId(),
+      changeRequestId: changeRequest._id,
+      approverEmployeeId: employees.alice._id, // Self-approval for demo
+      status: ApprovalDecision.PENDING,
+    });
+    console.log('Structure Approvals seeded.');
+  }
 }
 
 export async function seedPositionAssignments(connection: mongoose.Connection, employees: any, positions: any, departments: any) {

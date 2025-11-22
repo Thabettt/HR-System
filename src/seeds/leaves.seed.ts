@@ -11,6 +11,7 @@ import { LeaveStatus } from '../leaves/enums/leave-status.enum';
 import { CalendarSchema } from '../leaves/models/calendar.schema';
 import { LeaveAdjustmentSchema } from '../leaves/models/leave-adjustment.schema';
 import { AdjustmentType } from '../leaves/enums/adjustment-type.enum';
+import { AttachmentSchema } from '../leaves/models/attachment.schema';
 
 export async function seedLeaves(connection: mongoose.Connection, employees: any) {
   const LeaveCategoryModel = connection.model('LeaveCategory', LeaveCategorySchema);
@@ -20,6 +21,7 @@ export async function seedLeaves(connection: mongoose.Connection, employees: any
   const LeaveRequestModel = connection.model('LeaveRequest', LeaveRequestSchema);
   const CalendarModel = connection.model('Calendar', CalendarSchema);
   const LeaveAdjustmentModel = connection.model('LeaveAdjustment', LeaveAdjustmentSchema);
+  const AttachmentModel = connection.model('Attachment', AttachmentSchema);
 
   console.log('Clearing Leaves Data...');
   await LeaveCategoryModel.deleteMany({});
@@ -29,6 +31,7 @@ export async function seedLeaves(connection: mongoose.Connection, employees: any
   await LeaveRequestModel.deleteMany({});
   await CalendarModel.deleteMany({});
   await LeaveAdjustmentModel.deleteMany({});
+  await AttachmentModel.deleteMany({});
 
   console.log('Seeding Leave Categories...');
   const annualCategory = await LeaveCategoryModel.create({
@@ -159,6 +162,15 @@ export async function seedLeaves(connection: mongoose.Connection, employees: any
     hrUserId: employees.alice._id, // Alice adjusting her own leave for demo purposes
   });
   console.log('Leave Adjustments seeded.');
+
+  console.log('Seeding Attachments...');
+  await AttachmentModel.create({
+    originalName: 'medical_certificate.pdf',
+    filePath: '/uploads/medical_certificate.pdf',
+    fileType: 'application/pdf',
+    size: 1024,
+  });
+  console.log('Attachments seeded.');
 
   return {
     categories: { annualCategory, sickCategory },

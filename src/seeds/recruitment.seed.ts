@@ -18,6 +18,8 @@ import { ReferralSchema } from '../recruitment/models/referral.schema';
 import { ApplicationStatusHistorySchema } from '../recruitment/models/application-history.schema';
 import { ClearanceChecklistSchema } from '../recruitment/models/clearance-checklist.schema';
 import { ApprovalStatus } from '../recruitment/enums/approval-status.enum';
+import { DocumentSchema } from '../recruitment/models/document.schema';
+import { DocumentType } from '../recruitment/enums/document-type.enum';
 
 export async function seedRecruitment(connection: mongoose.Connection, employees: any, departments: any) {
   const JobTemplateModel = connection.model('JobTemplate', JobTemplateSchema);
@@ -32,6 +34,7 @@ export async function seedRecruitment(connection: mongoose.Connection, employees
   const ReferralModel = connection.model('Referral', ReferralSchema);
   const ApplicationStatusHistoryModel = connection.model('ApplicationStatusHistory', ApplicationStatusHistorySchema);
   const ClearanceChecklistModel = connection.model('ClearanceChecklist', ClearanceChecklistSchema);
+  const DocumentModel = connection.model('Document', DocumentSchema);
 
   console.log('Clearing Recruitment Data...');
   await JobTemplateModel.deleteMany({});
@@ -46,6 +49,7 @@ export async function seedRecruitment(connection: mongoose.Connection, employees
   await ReferralModel.deleteMany({});
   await ApplicationStatusHistoryModel.deleteMany({});
   await ClearanceChecklistModel.deleteMany({});
+  await DocumentModel.deleteMany({});
 
   console.log('Seeding Job Templates...');
   const softwareEngineerTemplate = await JobTemplateModel.create({
@@ -196,6 +200,14 @@ export async function seedRecruitment(connection: mongoose.Connection, employees
     cardReturned: true,
   });
   console.log('Clearance Checklists seeded.');
+
+  console.log('Seeding Documents...');
+  await DocumentModel.create({
+    ownerId: candidateJohn._id,
+    type: DocumentType.CV,
+    filePath: 'http://example.com/resume.pdf',
+  });
+  console.log('Documents seeded.');
 
   return {
     templates: { softwareEngineerTemplate, hrManagerTemplate },
