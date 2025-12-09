@@ -20,6 +20,8 @@ import {
   StructureChangeRequest,
   StructureChangeRequestSchema,
 } from './models/structure-change-request.schema';
+import { EmployeeProfileSchema } from '../employee-profile/models/employee-profile.schema';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
   imports: [
@@ -33,9 +35,11 @@ import {
         name: StructureChangeRequest.name,
         schema: StructureChangeRequestSchema,
       },
+      { name: 'EmployeeProfile', schema: EmployeeProfileSchema },
     ]),
+    NotificationModule,
   ],
   controllers: [OrganizationStructureController],
   providers: [OrganizationStructureService],
 })
-export class OrganizationStructureModule {}
+export class OrganizationStructureModule { }

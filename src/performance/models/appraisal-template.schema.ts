@@ -59,6 +59,23 @@ export class EvaluationCriterion {
 export const EvaluationCriterionSchema =
   SchemaFactory.createForClass(EvaluationCriterion);
 
+@Schema({ _id: false })
+export class TemplateSection {
+  @Prop({ type: String, required: true })
+  title: string;
+
+  @Prop({ type: String })
+  description?: string;
+
+  @Prop({ type: Number, required: true })
+  weight: number;
+
+  @Prop({ type: [EvaluationCriterionSchema], default: [] })
+  criteria: EvaluationCriterion[];
+}
+
+export const TemplateSectionSchema = SchemaFactory.createForClass(TemplateSection);
+
 @Schema({ collection: 'appraisal_templates', timestamps: true })
 export class AppraisalTemplate {
   @Prop({ type: String, required: true, unique: true })
@@ -77,8 +94,8 @@ export class AppraisalTemplate {
   @Prop({ type: RatingScaleDefinitionSchema, required: true })
   ratingScale: RatingScaleDefinition;
 
-  @Prop({ type: [EvaluationCriterionSchema], default: [] })
-  criteria: EvaluationCriterion[];
+  @Prop({ type: [TemplateSectionSchema], default: [] })
+  sections: TemplateSection[];
 
   @Prop({ type: String })
   instructions?: string;

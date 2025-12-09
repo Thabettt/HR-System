@@ -66,7 +66,8 @@ function isObjectIdLike(value: unknown): value is Types.ObjectId | string {
 PositionSchema.pre('save', async function (next) {
   try {
     const doc = this as HydratedDocument<Position>;
-    const DepartmentModel = model<DepartmentDocument>(Department.name);
+    // Use the connection from the document to get the model
+    const DepartmentModel = doc.db.model<DepartmentDocument>(Department.name);
     doc.reportsToPositionId = await resolveDepartmentHead(
       DepartmentModel,
       doc.departmentId,

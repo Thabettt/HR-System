@@ -1,0 +1,37 @@
+import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { AuthService } from './auth.service';
+import { LoginDto } from './dto/login.dto';
+import { LoginResponseDto } from './dto/login-response.dto';
+
+@ApiTags('Authentication')
+@Controller('auth')
+export class AuthController {
+  constructor(private authService: AuthService) { }
+
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Employee login' })
+  @ApiBody({ type: LoginDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Login successful',
+    type: LoginResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Invalid credentials',
+  })
+  async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
+    return this.authService.login(loginDto);
+  }
+
+  @Post('change-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Change password' })
+  @ApiBody({ schema: { type: 'object', properties: { userId: { type: 'string' }, newPassword: { type: 'string' } } } })
+  @ApiResponse({ status: 200, description: 'Password changed successfully' })
+  async changePassword(@Body() body: { userId: string; newPassword: string }) {
+    return this.authService.changePassword(body.userId, body.newPassword);
+  }
+}

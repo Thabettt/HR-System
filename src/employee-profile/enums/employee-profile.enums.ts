@@ -31,12 +31,12 @@ export enum WorkType {
 } // to be checked with Recruitment SubSystem
 
 export enum SystemRole {
-  DEPARTMENT_EMPLOYEE = 'department employee',
-  DEPARTMENT_HEAD = 'department head',
+  DEPARTMENT_EMPLOYEE = 'Department Employee',
+  DEPARTMENT_HEAD = 'Department Head',
   HR_MANAGER = 'HR Manager',
   HR_EMPLOYEE = 'HR Employee',
   PAYROLL_SPECIALIST = 'Payroll Specialist',
-  PAYROLL_MANAGER='Payroll Manager',
+  PAYROLL_MANAGER = 'Payroll Manager',
   SYSTEM_ADMIN = 'System Admin',
   LEGAL_POLICY_ADMIN = 'Legal & Policy Admin',
   RECRUITER = 'Recruiter',
@@ -44,6 +44,8 @@ export enum SystemRole {
   JOB_CANDIDATE = 'Job Candidate',
   HR_ADMIN = 'HR Admin',
 }
+
+export const ALL_EMPLOYEE_ROLES = Object.values(SystemRole).filter(role => role !== SystemRole.JOB_CANDIDATE);
 
 export enum CandidateStatus {
   APPLIED = 'APPLIED',

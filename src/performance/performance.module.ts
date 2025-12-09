@@ -22,6 +22,9 @@ import {
   AppraisalDispute,
   AppraisalDisputeSchema,
 } from './models/appraisal-dispute.schema';
+import { EmployeeProfileSchema } from '../employee-profile/models/employee-profile.schema';
+import { DepartmentSchema } from '../organization-structure/models/department.schema';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
   imports: [
@@ -31,10 +34,13 @@ import {
       { name: AppraisalAssignment.name, schema: AppraisalAssignmentSchema },
       { name: AppraisalRecord.name, schema: AppraisalRecordSchema },
       { name: AppraisalDispute.name, schema: AppraisalDisputeSchema },
+      { name: 'EmployeeProfile', schema: EmployeeProfileSchema },
+      { name: 'Department', schema: DepartmentSchema },
     ]),
+    NotificationModule,
   ],
   controllers: [PerformanceController],
   providers: [PerformanceService],
   exports: [PerformanceService],
 })
-export class PerformanceModule {}
+export class PerformanceModule { }

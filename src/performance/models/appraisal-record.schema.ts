@@ -66,6 +66,12 @@ export class AppraisalRecord {
   @Prop({ type: String })
   improvementAreas?: string;
 
+  @Prop({ type: String })
+  achievements?: string;
+
+  @Prop({ type: String })
+  goals?: string;
+
   @Prop({
     type: String,
     enum: Object.values(AppraisalRecordStatus),

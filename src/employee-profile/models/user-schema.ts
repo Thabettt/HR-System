@@ -38,6 +38,9 @@ export class UserProfileBase {
   @Prop({ type: String })
   password?: string;
 
+  @Prop({ type: Boolean, default: false })
+  isTemporaryPassword?: boolean;
+
   // Demographics
   @Prop({ type: String, enum: Object.values(Gender) })
   gender?: Gender;

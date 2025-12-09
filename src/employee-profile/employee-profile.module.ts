@@ -20,8 +20,22 @@ import {
   EmployeeQualificationSchema,
 } from './models/qualification.schema';
 
+import { AuthModule } from '../auth/auth.module';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
+import { NotificationModule } from '../notification/notification.module';
+import { MulterModule } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+
 @Module({
   imports: [
+    AuthModule,
+    PassportModule,
+    JwtModule.register({
+      secret: process.env.JWT_SECRET || 'your-secret-key-change-this',
+      signOptions: { expiresIn: '24h' },
+    }),
     MongooseModule.forFeature([
       { name: Candidate.name, schema: CandidateSchema },
       { name: EmployeeProfile.name, schema: EmployeeProfileSchema },
@@ -32,8 +46,33 @@ import {
       },
       { name: EmployeeQualification.name, schema: EmployeeQualificationSchema },
     ]),
+    NotificationModule,
+    MulterModule.register({
+      storage: diskStorage({
+        destination: './uploads/profile-pictures',
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const ext = extname(file.originalname);
+          cb(null, `profile-${uniqueSuffix}${ext}`);
+        },
+      }),
+      fileFilter: (req, file, cb) => {
+        const allowedTypes = /jpeg|jpg|png|webp/;
+        const mimeType = allowedTypes.test(file.mimetype);
+        const extName = allowedTypes.test(extname(file.originalname).toLowerCase());
+
+        if (mimeType && extName) {
+          return cb(null, true);
+        }
+        cb(new Error('Only image files (JPEG, PNG, WebP) are allowed!'), false);
+      },
+      limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB
+      },
+    }),
   ],
   controllers: [EmployeeProfileController],
   providers: [EmployeeProfileService],
+  exports: [EmployeeProfileService],
 })
-export class EmployeeProfileModule {}
+export class EmployeeProfileModule { }
